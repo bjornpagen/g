@@ -4,17 +4,17 @@ const (
 	bufferMin = 64*1024 - 1
 )
 
-type GapBuffer struct {
+type gapBuffer struct {
 	gapStart int
 	gapEnd   int
 	buf      []rune
 }
 
-func (b *GapBuffer) gapSize() int {
+func (b *gapBuffer) gapSize() int {
 	return b.gapEnd - b.gapStart
 }
 
-func (b *GapBuffer) moveGap(position int) {
+func (b *gapBuffer) moveGap(position int) {
 	if position == b.gapStart {
 		return
 	} else if position < b.gapStart {
@@ -30,7 +30,7 @@ func (b *GapBuffer) moveGap(position int) {
 	}
 }
 
-func (b *GapBuffer) ensureGap(length int) {
+func (b *gapBuffer) ensureGap(length int) {
 	if b.gapSize() >= length {
 		return
 	}
@@ -46,12 +46,12 @@ func (b *GapBuffer) ensureGap(length int) {
 	b.gapEnd = newSize - endSize
 }
 
-func (b *GapBuffer) deleteBuffer(position, length int) {
+func (b *gapBuffer) deleteBuffer(position, length int) {
 	b.moveGap(position)
 	b.gapEnd += length
 }
 
-func (b *GapBuffer) readBuffer(c []rune, position int) (n int) {
+func (b *gapBuffer) readBuffer(c []rune, position int) (n int) {
 	if position < b.gapStart {
 		d := b.gapStart - position
 		n += copy(c[:d], b.buf[position:b.gapStart])
@@ -64,7 +64,7 @@ func (b *GapBuffer) readBuffer(c []rune, position int) (n int) {
 	return copy(c, b.buf[position:])
 }
 
-func (b *GapBuffer) insertBuffer(position int, s []rune) {
+func (b *gapBuffer) insertBuffer(position int, s []rune) {
 	b.ensureGap(len(s))
 	b.moveGap(position)
 	copy(b.buf[b.gapStart:], s)
@@ -73,12 +73,12 @@ func (b *GapBuffer) insertBuffer(position int, s []rune) {
 
 type Buffer struct {
 	numRunes int
-	gb       *GapBuffer
+	gb       *gapBuffer
 }
 
 func New() Buffer {
 	return Buffer{
-		gb: &GapBuffer{
+		gb: &gapBuffer{
 			buf:    make([]rune, bufferMin),
 			gapEnd: bufferMin,
 		},
